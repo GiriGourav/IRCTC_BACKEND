@@ -1,26 +1,29 @@
 package com.irctc.backend.entity;
 
-import com.irctc.backend.annotations.ValidCoach;
-import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.*;
 
-
+@Entity
 public class Train {
 
-    @NotEmpty(message = "Train number cannot be null")
-    @Size(min = 4, max = 10, message = "Train number must be between 4 and 10 characters")
+    @Id
+    @Column(name = "train_number")
     private String trainNumber;
-    @Pattern(regexp = "^[A-Za-z][A-Za-z-]*[A-Za-z]$", message = "Invalid train name, letter, spaces & hyphens are allowed")
-    private String trainName;
-    @ValidCoach
-    private int coaches;
 
-    public Train(String trainNumber,String trainName, int coaches) {
+    @Column(name = "train_name")
+    private String trainName;
+
+    @Column(name = "route_name")
+    private String routeName;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private TrainImage trainImage;
+
+    public String getTrainNumber() {
+        return trainNumber;
+    }
+
+    public void setTrainNumber(String trainNumber) {
         this.trainNumber = trainNumber;
-        this.trainName = trainName;
-        this.coaches = coaches;
     }
 
     public String getTrainName() {
@@ -31,19 +34,19 @@ public class Train {
         this.trainName = trainName;
     }
 
-    public String getTrainNumber() {
-        return trainNumber;
+    public String getRouteName() {
+        return routeName;
     }
 
-    public void setTrainNumber(String trainNumber) {
-        this.trainNumber = trainNumber;
+    public void setRouteName(String routeName) {
+        this.routeName = routeName;
     }
 
-    public int getCoaches() {
-        return coaches;
+    public TrainImage getTrainImage() {
+        return trainImage;
     }
 
-    public void setCoaches(int coaches) {
-        this.coaches = coaches;
+    public void setTrainImage(TrainImage trainImage) {
+        this.trainImage = trainImage;
     }
 }

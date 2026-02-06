@@ -1,10 +1,12 @@
 package com.irctc.backend.Controller;
 
-import com.irctc.backend.Service.FileUploadService;
+import com.irctc.backend.Service.TrainImageService;
 import com.irctc.backend.Service.TrainService;
-import com.irctc.backend.dto.ErrorResponse;
 import com.irctc.backend.dto.ImageMetaData;
-import com.irctc.backend.entity.Train;
+import com.irctc.backend.dto.PageResponse;
+import com.irctc.backend.dto.TrainDto;
+import com.irctc.backend.dto.TrainImageResponse;
+import com.irctc.backend.repositories.TrainRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,17 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
 
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/trains")
@@ -31,35 +24,43 @@ public class TrainController {
     private TrainService trainService;
 
     @Autowired
-    private FileUploadService fileUploadService;
+    private TrainRepository trainRepository;
 
-    @PostMapping("/photo")
-    public ImageMetaData uploadtrainupload(
-            @RequestParam("file") MultipartFile file) throws IOException {
-//        using Repository save this to database
-        return fileUploadService.uploadImage(file);
-    }
 
-    @GetMapping()
-    public List<Train> getAll()
+
+    @Autowired
+    private TrainImageService trainImageService;
+
+
+
+    @GetMapping
+    public PageResponse<TrainDto> getAll(
+                           @RequestParam (value="page", defaultValue = "0") int page,
+                           @RequestParam (value="size", defaultValue = "10") int size,
+                           @RequestParam (value="sortBy", defaultValue = "trainNumber") String sortBy,
+                           @RequestParam (value="sortDir", defaultValue = "asc") String sortDir)
     {
-        return this.trainService.getAll();
+
+        return this.trainService.all(page,size,sortBy,sortDir);
     }
+
     @GetMapping("/{trainNumber}")
-    public Train getTrainById(@PathVariable String trainNumber)
+    public ResponseEntity<TrainDto> getTrainById(@PathVariable String trainNumber)
     {
-        return this.trainService.getTrainById(trainNumber);
+        return new ResponseEntity<>( this.trainService.getTrainById(trainNumber), HttpStatus.OK);
     }
+
     @DeleteMapping("/{trainNumber}")
     public void deleteTrain(@PathVariable String trainNumber)
     {
-        this.trainService.deleteTrain(trainNumber);
+        trainRepository.deleteById(trainNumber);
     }
-    @PostMapping()
-    public ResponseEntity<Train> add(@Valid @RequestBody Train train)
-    {
 
-        return new ResponseEntity<>(this.trainService.add(train), HttpStatus.CREATED);
+    @PostMapping()
+    public ResponseEntity<TrainDto> add(@Valid @RequestBody TrainDto trainDto)
+    {
+         return new ResponseEntity<>( this.trainService.add(trainDto), HttpStatus.CREATED);
+
     }
 //    @RequestMapping("/train")
 //    public List<Train> getTrain() {
@@ -82,4 +83,11 @@ public class TrainController {
 //       ErrorResponse response= new ErrorResponse("Train not found !!" + exception.getMessage(), "404", false);
 //       return response;
 //    }
+    @PostMapping("/upload/{trainNo}")
+    public TrainImageResponse uploadTrainImage(
+            @RequestParam("image") MultipartFile image,
+            @PathVariable String trainNo) throws IOException
+    {
+        return trainImageService.upload(image, trainNo);
+    }
 }
