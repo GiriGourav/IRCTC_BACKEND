@@ -1,5 +1,6 @@
 package com.irctc.backend.Service;
 
+import com.irctc.backend.config.AppConstants;
 import org.springframework.http.MediaType;
 import com.irctc.backend.dto.TrainImageDataWithResource;
 import com.irctc.backend.dto.TrainImageResponse;
@@ -59,16 +60,16 @@ public class TrainImageService {
 
         Train savedTrain = trainRepository.save(train);
 
-        return TrainImageResponse.from(savedTrain.getTrainImage(), "http://localhost:8080",trainNo);
+        return TrainImageResponse.from(savedTrain.getTrainImage(), AppConstants.baseUrl,trainNo);
 
 
     }
 
 
-    public TrainImageDataWithResource loadImageByTrainNo(String trainId) throws MalformedURLException {
+    public TrainImageDataWithResource loadImageByTrainNo(String trainNo) throws MalformedURLException {
 
         //get the train using tain no
-        Train train = trainRepository.findById(trainId).orElseThrow(() -> new ResourceNotFoundException("Train not found!!"));
+        Train train = trainRepository.findById(trainNo).orElseThrow(() -> new ResourceNotFoundException("Train not found!!"));
         TrainImage trainImage = train.getTrainImage();
         if (trainImage == null) {
             throw new ResourceNotFoundException("Image not found !!");

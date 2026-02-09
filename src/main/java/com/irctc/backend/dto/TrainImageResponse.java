@@ -20,7 +20,7 @@ public record TrainImageResponse(
                 image.getId(),
                 image.getFileName(),
                 image.getFileType(),
-                baseUrl + "/" + image.getFileName(),
+                baseUrl + "/trains/" + trainNo + "/image",
                 image.getSize(),
                 image.getUploadTime()
         );
